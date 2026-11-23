@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37906.3 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrimeGameStore.Web", "CrimeGameStore.Web\CrimeGameStore.Web.csproj", "{1FECCBA5-CD48-4E74-BEC6-70A93B4B89EF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1FECCBA5-CD48-4E74-BEC6-70A93B4B89EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FECCBA5-CD48-4E74-BEC6-70A93B4B89EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FECCBA5-CD48-4E74-BEC6-70A93B4B89EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FECCBA5-CD48-4E74-BEC6-70A93B4B89EF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3409411A-3CD9-4798-ADB5-DB15D4D71494}
+	EndGlobalSection
+EndGlobal

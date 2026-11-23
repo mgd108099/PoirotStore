@@ -1,0 +1,161 @@
+﻿@model IEnumerable<CrimeGameStore.Web.Models.CrimeCase>
+@inject CrimeGameStore.Web.Services.ISiteSettingsService SettingsService
+
+@{
+    var settings = await SettingsService.GetSettingsAsync();
+    ViewData["Title"] = settings.SiteSubtitle;
+    ViewData["MetaDescription"] = settings.DefaultMetaDescription;
+    ViewData["MetaKeywords"] = settings.DefaultMetaKeywords;
+}
+
+<!-- 1. البانر السينمائي الرئيسي (Hero Section - يتحكم به الأدمن) -->
+<section class="poirot-hero-full py-5">
+    <div class="container py-lg-4">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7 text-center text-lg-end">
+                <div class="mb-3">
+                    <span class="hero-pill">
+                        <i class="fa-solid fa-folder-closed ms-1"></i> @settings.HeroBadge
+                    </span>
+                </div>
+                <h1 class="display-5 fw-bold text-white mb-3 lh-sm">
+                    @settings.HeroTitle <span class="hero-highlight">@settings.HeroHighlight</span>
+                </h1>
+                <p class="lead text-light opacity-75 mb-4 leading-relaxed">
+                    @settings.HeroDescription
+                </p>
+
+                <div class="d-flex justify-content-center justify-content-lg-start gap-3 flex-wrap mb-4">
+                    <a asp-controller="Cases" asp-action="Index" class="btn btn-light text-poirot-blue fw-bold btn-lg px-4 shadow-sm">
+                        <i class="fa-solid fa-magnifying-glass ms-1"></i> استعرض ملفات القضايا
+                    </a>
+                    <a asp-controller="Home" asp-action="HowToPlay" class="btn btn-outline-light fw-bold btn-lg px-4">
+                        <i class="fa-solid fa-circle-play ms-1"></i> كيف تعمل اللعبة؟
+                    </a>
+                </div>
+
+                <!-- مؤشرات الثقة السريعة -->
+                <div class="d-flex justify-content-center justify-content-lg-start gap-4 flex-wrap text-light opacity-75 small pt-2">
+                    <span><i class="fa-solid fa-check-circle ms-1 text-white"></i> نسخة ورقية </span>
+                    <span><i class="fa-solid fa-check-circle ms-1 text-white"></i> لعب فردي أو جماعي</span>
+                    <span><i class="fa-solid fa-check-circle ms-1 text-white"></i> بوابة حلول وتلميحات عبر QR</span>
+                </div>
+            </div>
+
+            <!-- بطاقة ملف سري تفاعلية المظهر على اليسار -->
+            <div class="col-lg-5">
+                <div class="dossier-preview-card p-4 shadow-lg">
+                    <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-25 pb-3 mb-3">
+                        <span class="badge bg-poirot-blue text-white px-3 py-2">أرشيف @settings.SiteName</span>
+                        <span class="confidential-stamp">سري للغاية</span>
+                    </div>
+                    <h2 class="h5 fw-bold text-poirot-blue mb-3">ماذا ستجد داخل كل قضية؟</h2>
+                    <ul class="list-unstyled d-flex flex-column gap-3 mb-0 small text-dark">
+                        <li class="d-flex align-items-start gap-2">
+                            <i class="fa-solid fa-file-medical text-poirot-blue mt-1"></i>
+                            <span><strong>تقارير طب شرعي وسموم</strong> مصممة بأسلوب رسمي دقيق.</span>
+                        </li>
+                        <li class="d-flex align-items-start gap-2">
+                            <i class="fa-solid fa-comments text-poirot-blue mt-1"></i>
+                            <span><strong>محاضر استجواب المشتبه بهم</strong> المليئة بالتفاصيل والأكاذيب الخفية.</span>
+                        </li>
+                        <li class="d-flex align-items-start gap-2">
+                            <i class="fa-solid fa-qrcode text-poirot-blue mt-1"></i>
+                            <span><strong>رمز QR مستقل</strong> يأخذك لبوابة التلميحات وقرار المحكمة النهائي.</span>
+                        </li>
+                        <li class="d-flex align-items-start gap-2">
+                            <i class="fa-solid fa-key text-poirot-blue mt-1"></i>
+                            <span><strong>ألغاز وشيفرات ذكية</strong> لا تُحل إلا بالربط المنطقي والتحليل.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 2. أبرز القضايا المفتوحة (مسحوبة مباشرة من SQL Server) -->
+<section class="py-5 container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3">
+        <div>
+            <span class="stamp-badge mb-2">ملفات مفتوحة للتحقيق</span>
+            <h2 class="fw-bold text-poirot-blue mb-1">أبرز قضايا @settings.SiteName</h2>
+            <p class="text-muted mb-0">اختر قضيتك الأولى وحدد طريقة الاستلام</p>
+        </div>
+        <a asp-controller="Cases" asp-action="Index" class="btn btn-poirot-outline">
+            عرض جميع القضايا <i class="fa-solid fa-arrow-left me-1"></i>
+        </a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <article class="case-card h-100 d-flex flex-column">
+                        <div class="case-cover-wrapper position-relative bg-light d-flex align-items-center justify-content-center p-4">
+                            <img src="@item.CoverImageUrl" alt="ملف @item.Title" class="case-cover-img" loading="lazy" />
+                            <span class="position-absolute top-0 end-0 m-3 badge bg-poirot-black text-white px-3 py-2">
+                                ملف @item.CaseCode
+                            </span>
+                            <span class="position-absolute top-0 start-0 m-3 badge bg-white text-poirot-blue border border-primary-subtle fw-bold px-2 py-1">
+                                الصعوبة: @item.Difficulty
+                            </span>
+                        </div>
+
+                        <div class="p-4 d-flex flex-column flex-grow-1">
+                            <h3 class="h5 fw-bold text-dark mb-2">@item.Title</h3>
+                            <p class="text-muted small mb-3 flex-grow-1 leading-relaxed">
+                                @item.ShortDescription
+                            </p>
+
+                            <div class="d-flex justify-content-between text-muted small border-top border-bottom py-2 mb-3">
+                                <span><i class="fa-solid fa-users text-poirot-blue ms-1"></i> @item.PlayersCount</span>
+                                <span><i class="fa-regular fa-clock text-poirot-blue ms-1"></i> @item.EstimatedTime</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                @if (item.IsPhysicalAvailable)
+                                {
+                                    <div class="small">
+                                        <span class="text-muted d-block" style="font-size: 0.75rem;">النسخة الورقية</span>
+                                        <strong class="text-poirot-blue">@item.PhysicalPrice.ToString("N0") ل.س</strong>
+                                    </div>
+                                }
+                            </div>
+
+                            <a asp-controller="Cases" asp-action="Details" asp-route-slug="@item.Slug" class="btn btn-poirot-blue w-100">
+                                <i class="fa-solid fa-folder-open ms-1"></i> افتح ملف القضية
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-light border text-center py-5">
+            <i class="fa-solid fa-folder-open fs-2 text-poirot-blue mb-2"></i>
+            <p class="mb-0 text-muted">جاري تجهيز ملفات القضايا الجديدة في الأرشيف...</p>
+        </div>
+    }
+</section>
+
+<section class="py-5 container">
+    <div class="poirot-hero p-4 p-md-5 text-center shadow">
+        <h2 class="fw-bold text-white mb-3">@settings.HomeCtaTitle</h2>
+        <p class="text-light opacity-75 mx-auto mb-4" style="max-width: 600px;">
+            @settings.HomeCtaDescription
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a asp-controller="Cases" asp-action="Index" class="btn btn-light text-poirot-blue fw-bold px-4 py-2">
+                تصفح المتجر الآن
+            </a>
+            <a asp-controller="Home" asp-action="HowToPlay" class="btn btn-outline-light fw-bold px-4 py-2">
+                اقرأ دليل المحقق والأسئلة الشائعة
+            </a>
+        </div>
+    </div>
+</section>

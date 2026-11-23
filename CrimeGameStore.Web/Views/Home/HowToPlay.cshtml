@@ -1,0 +1,161 @@
+﻿@using System.Text.Encodings.Web
+@using System.Text.Json
+@model IEnumerable<CrimeGameStore.Web.Models.FaqItem>
+
+@{
+    ViewData["Title"] = "كيف تلعب؟ والأسئلة الشائعة";
+    ViewData["MetaDescription"] = "تعرف على طريقة لعب ألعاب التحقيقات الجنائية من بوارو (Poirot)، والفرق بين النسخة الورقية والنسخة الإلكترونية، مع إجابات شاملة للأسئلة الشائعة.";
+    ViewData["MetaKeywords"] = "طريقة لعب بوارو, كيف تلعب لعبة التحقيقات الجنائية, الفرق بين النسخة الورقية والإلكترونية, أسئلة شائعة بوارو";
+
+    var faqList = Model?.ToList() ?? new List<CrimeGameStore.Web.Models.FaqItem>();
+
+    // بناء بيانات FAQPage Schema تلقائياً من قاعدة البيانات
+    var faqSchemaObj = new Dictionary<string, object>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "FAQPage",
+        ["mainEntity"] = faqList.Select(f => new Dictionary<string, object>
+        {
+            ["@type"] = "Question",
+            ["name"] = f.Question,
+            ["acceptedAnswer"] = new Dictionary<string, object>
+            {
+                ["@type"] = "Answer",
+                ["text"] = f.Answer
+            }
+        }).ToList()
+    };
+
+    var faqSchemaJson = JsonSerializer.Serialize(faqSchemaObj, new JsonSerializerOptions
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    });
+}
+
+@if (faqList.Any())
+{
+    <!-- بيانات منظمة للأسئلة الشائعة (SEO FAQPage Schema - ديناميكية) -->
+    <script type="application/ld+json">
+        @Html.Raw(faqSchemaJson)
+    </script>
+}
+
+<!-- ترويسة الصفحة -->
+<section class="poirot-page-header py-5">
+    <div class="container text-center">
+        <nav aria-label="breadcrumb" class="d-flex justify-content-center mb-2">
+            <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-light opacity-75">الرئيسية</a></li>
+                <li class="breadcrumb-item active text-white fw-bold" aria-current="page">كيف تلعب؟</li>
+            </ol>
+        </nav>
+        <h1 class="display-6 fw-bold text-white mb-3">دليل المحقق: كيف تعمل قضايا بوارو؟</h1>
+        <p class="lead text-light opacity-75 mx-auto mb-0" style="max-width: 680px;">
+            لا تحتاج لأي خبرة سابقة أو قواعد معقدة كل ما تحتاجه هو تركيزك وفنجان قهوة ورغبتك في كشف الحقيقة
+        </p>
+    </div>
+</section>
+
+<!-- 1. خطوات التحقيق الأربع -->
+<section class="py-5 container">
+    <div class="text-center mb-5">
+        <span class="stamp-badge mb-2">4 خطوات بسيطة</span>
+        <h2 class="fw-bold text-poirot-blue">رحلتك من فتح الملف إلى قاعة المحكمة</h2>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="case-card p-4 h-100 text-center">
+                <div class="step-number mx-auto mb-3">1</div>
+                <h3 class="h5 fw-bold text-poirot-blue mb-2">اختر قضيتك ونسختك</h3>
+                <p class="text-muted small leading-relaxed mb-0">
+                    اختر القضية المناسبة لمستوى التحدي الذي تريده وحدد الخيار المفضل لك: <strong>طرد ورقي مطبوع</strong> 
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="case-card p-4 h-100 text-center">
+                <div class="step-number mx-auto mb-3">2</div>
+                <h3 class="h5 fw-bold text-poirot-blue mb-2">افحص الأدلة والتقارير</h3>
+                <p class="text-muted small leading-relaxed mb-0">
+                    افتح الملف وابدأ بقراءة التقرير الافتتاحي ثم وزّع تقارير الطب الشرعي ومحاضر الاستجواب والمستندات بين أعضاء فريقك
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="case-card p-4 h-100 text-center">
+                <div class="step-number mx-auto mb-3">3</div>
+                <h3 class="h5 fw-bold text-poirot-blue mb-2">اربط الخيوط وفك الشيفرات</h3>
+                <p class="text-muted small leading-relaxed mb-0">
+                    قارن التواريخ والأوقات  اكتشف التناقض في أقوال المشتبه بهم وحل الشيفرات السرية لتصل إلى الدافع والدليل القاطع
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="case-card p-4 h-100 text-center">
+                <div class="step-number mx-auto mb-3">4</div>
+                <h3 class="h5 fw-bold text-poirot-blue mb-2">امسح الـ QR وأدِن القاتل</h3>
+                <p class="text-muted small leading-relaxed mb-0">
+                    امسح رمز <strong>QR</strong> الموجود داخل الملف للدخول إلى بوابة الحلول المستقلة اطلب تلميحاً عند الحاجة أو قدّم لائحة الاتهام لتعرف حكم المحكمة
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3. قسم الأسئلة الشائعة (مسحوب تلقائياً من قاعدة البيانات) -->
+<section id="faq-section" class="py-5 container">
+    <div class="text-center mb-5">
+        <span class="stamp-badge mb-2">إجابات واضحة</span>
+        <h2 class="fw-bold text-poirot-blue">الأسئلة الشائعة</h2>
+        <p class="text-muted">كل ما يدور في ذهنك قبل طلب قضيتك الأولى من بوارو.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            @if (faqList.Any())
+            {
+                <div class="accordion accordion-poirot" id="poirotFaqAccordion">
+                    @{
+                        int faqIndex = 0;
+                    }
+                    @foreach (var faq in faqList)
+                    {
+                        faqIndex++;
+                        <div class="accordion-item mb-3 rounded-3 overflow-hidden border">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button @(faqIndex == 1 ? "" : "collapsed") fw-bold"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#faq_@faq.Id"
+                                        aria-expanded="@(faqIndex == 1 ? "true" : "false")">
+                                    @faq.Question
+                                </button>
+                            </h3>
+                            <div id="faq_@faq.Id"
+                                 class="accordion-collapse collapse @(faqIndex == 1 ? "show" : "")"
+                                 data-bs-parent="#poirotFaqAccordion">
+                                <div class="accordion-body text-muted leading-relaxed" style="white-space: pre-line;">@faq.Answer</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-light border text-center text-muted small">
+                    لا توجد أسئلة شائعة مضافة حالياً
+                </div>
+            }
+
+            <div class="text-center mt-5">
+                <a asp-controller="Cases" asp-action="Index" class="btn btn-poirot-blue btn-lg px-5">
+                    <i class="fa-solid fa-folder-open ms-1"></i> انتقل لاختيار قضيتك الأولى
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

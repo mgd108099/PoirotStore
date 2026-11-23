@@ -1,0 +1,72 @@
+﻿@model IEnumerable<CrimeGameStore.Web.Models.CrimeCase>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "إدارة القضايا";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h4 fw-bold text-poirot mb-0">إدارة ملفات القضايا</h1>
+    <a asp-action="CreateCase" class="btn btn-poirot">
+        <i class="fa-solid fa-plus ms-1"></i> إضافة قضية جديدة
+    </a>
+</div>
+
+<div class="admin-card p-3">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle small mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>الغلاف</th>
+                    <th>الرمز والعنوان</th>
+                    <th>الرابط (SEO Slug)</th>
+                    <th>السعر الورقي / المخزون</th>
+                    <th>السعر الرقمي</th>
+                    <th>الحالة</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><img src="@item.CoverImageUrl" style="width: 50px; height: 50px; object-fit: contain;" class="border rounded bg-light p-1" /></td>
+                        <td>
+                            <div class="fw-bold">@item.Title</div>
+                            <span class="badge bg-dark">@item.CaseCode</span>
+                            @if (item.IsFeatured)
+                            {
+                                <span class="badge bg-warning text-dark">مميزة بالرئيسية</span>
+                            }
+                        </td>
+                        <td dir="ltr"><a href="/cases/@item.Slug" target="_blank">/cases/@item.Slug</a></td>
+                        <td>
+                            <strong>@item.PhysicalPrice.ToString("N0") ل.س</strong>
+                            <span class="badge @(item.PhysicalStock > 0 ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger")">
+                                مخزون: @item.PhysicalStock
+                            </span>
+                        </td>
+                        <td><strong>@item.DigitalPrice.ToString("0.##") $</strong></td>
+                        <td>
+                            @if (item.IsActive)
+                            {
+                                <span class="badge bg-success">ظاهرة بالمتجر</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">مخفية</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a asp-action="EditCase" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">تعديل وصور</a>
+                                <form asp-action="DeleteCase" asp-route-id="@item.Id" method="post" onsubmit="return confirm('هل أنت متأكد من حذف/إخفاء هذه القضية؟');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

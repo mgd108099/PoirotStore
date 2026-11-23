@@ -1,0 +1,407 @@
+﻿@using System.Globalization
+@using CrimeGameStore.Web.Models
+@model CrimeGameStore.Web.Models.CrimeCase
+
+@{
+    ViewData["Title"] = !string.IsNullOrWhiteSpace(Model.MetaTitle) ? Model.MetaTitle : $"{Model.Title} ({Model.CaseCode})";
+    ViewData["MetaDescription"] = !string.IsNullOrWhiteSpace(Model.MetaDescription) ? Model.MetaDescription : Model.ShortDescription;
+    ViewData["MetaKeywords"] = !string.IsNullOrWhiteSpace(Model.MetaKeywords) ? Model.MetaKeywords : $"{Model.Title}, بوارو, Poirot, لعبة تحقيقات جنائية";
+    ViewData["OgImage"] = $"{Context.Request.Scheme}://{Context.Request.Host}{Model.CoverImageUrl}";
+
+    var relatedCases = ViewBag.RelatedCases as List<CrimeCase> ?? new List<CrimeCase>();
+
+    // تحديد النسخة الافتراضية عند فتح الصفحة (الورقية أولاً إن كانت متوفرة وفيها مخزون، وإلا الإلكترونية)
+    bool canBuyPhysical = Model.IsPhysicalAvailable && Model.PhysicalStock > 0;
+    bool canBuyDigital = Model.IsDigitalAvailable;
+    string defaultEdition = canBuyPhysical ? "physical" : (canBuyDigital ? "digital" : "physical");
+
+    string physicalPriceInv = Model.PhysicalPrice.ToString("0", CultureInfo.InvariantCulture);
+    string digitalPriceInv = Model.DigitalPrice.ToString("0.##", CultureInfo.InvariantCulture);
+}
+
+<!-- بيانات منظمة للمنتج لمحرك بحث جوجل (Product Schema JSON-LD) -->
+<script type="application/ld+json">
+    {
+      "@@context": "https://schema.org/",
+      "@@type": "Product",
+      "name": "@Model.Title (@Model.CaseCode)",
+      "image": "@($"{Context.Request.Scheme}://{Context.Request.Host}{Model.CoverImageUrl}")",
+      "description": "@Model.ShortDescription",
+      "sku": "@Model.CaseCode",
+      "brand": {
+        "@@type": "Brand",
+        "name": "بوارو - Poirot"
+      },
+      "offers": [
+        @if (Model.IsPhysicalAvailable)
+        {
+                <text>{
+                  "@@type": "Offer",
+                  "name": "النسخة الورقية المطبوعة",
+                  "priceCurrency": "SYP",
+                  "price": "@physicalPriceInv",
+                  "availability": "@(Model.PhysicalStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock")"
+                }@(Model.IsDigitalAvailable ? "," : "")</text>
+        }
+        @if (Model.IsDigitalAvailable)
+        {
+                <text>{
+                  "@@type": "Offer",
+                  "name": "النسخة الإلكترونية (PDF فوري)",
+                  "priceCurrency": "USD",
+                  "price": "@digitalPriceInv",
+                  "availability": "https://schema.org/InStock"
+                }</text>
+        }
+      ]
+    }
+</script>
+
+<!-- مسار التنقل (Breadcrumb للسيو) -->
+<div class="bg-white border-bottom py-3">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-muted">الرئيسية</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Cases" asp-action="Index" class="text-muted">ملفات القضايا</a></li>
+                <li class="breadcrumb-item active text-poirot-blue fw-bold" aria-current="page">@Model.Title</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- المحتوى الرئيسي لصفحة القضية -->
+<section class="py-5 container">
+    <div class="row g-5 align-items-start">
+
+        <!-- العمود الأيمن: صورة القضية ومعرض الصور (Gallery) -->
+        <div class="col-lg-5">
+            <div class="case-card p-3 p-md-4 mb-3">
+                <div class="position-relative case-detail-main-img-box d-flex align-items-center justify-content-center rounded-3 p-4">
+                    <img id="mainCaseImage" src="@Model.CoverImageUrl" alt="غلاف @Model.Title" class="img-fluid" style="max-height: 320px; object-fit: contain;" />
+                    <span class="position-absolute top-0 end-0 m-3 badge bg-poirot-black text-white px-3 py-2 fs-6">
+                        ملف @Model.CaseCode
+                    </span>
+                    <span class="position-absolute bottom-0 start-0 m-3 confidential-stamp bg-white">
+                        سري للغاية
+                    </span>
+                </div>
+                <p id="mainImageCaption" class="text-center text-muted small mt-2 mb-0">
+                    الغلاف الرسمي لملف @Model.Title
+                </p>
+
+                <!-- الصور المصغرة من جدول CaseGalleries -->
+                @if (Model.GalleryImages != null && Model.GalleryImages.Any())
+                {
+                    <div class="d-flex gap-2 mt-3 flex-wrap justify-content-center">
+                        <button type="button" class="gallery-thumb active" data-src="@Model.CoverImageUrl" data-caption="الغلاف الرسمي لملف @Model.Title">
+                            <img src="@Model.CoverImageUrl" alt="@Model.Title" />
+                        </button>
+                        @foreach (var img in Model.GalleryImages)
+                        {
+                            <button type="button" class="gallery-thumb" data-src="@img.ImageUrl" data-caption="@img.Caption">
+                                <img src="@img.ImageUrl" alt="@img.Caption" />
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- بطاقة مواصفات القضية السريعة -->
+            <div class="case-card p-3">
+                <div class="row text-center g-2">
+                    <div class="col-4 border-start">
+                        <i class="fa-solid fa-gauge-high text-poirot-blue mb-1 d-block"></i>
+                        <small class="text-muted d-block" style="font-size: 0.72rem;">الصعوبة</small>
+                        <strong class="small text-dark">@Model.Difficulty</strong>
+                    </div>
+                    <div class="col-4 border-start">
+                        <i class="fa-solid fa-users text-poirot-blue mb-1 d-block"></i>
+                        <small class="text-muted d-block" style="font-size: 0.72rem;">المحققون</small>
+                        <strong class="small text-dark">@Model.PlayersCount</strong>
+                    </div>
+                    <div class="col-4">
+                        <i class="fa-regular fa-clock text-poirot-blue mb-1 d-block"></i>
+                        <small class="text-muted d-block" style="font-size: 0.72rem;">المدة</small>
+                        <strong class="small text-dark">@Model.EstimatedTime</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- العمود الأيسر: العنوان، اختيار النسخة التفاعلي، السعر، والقصة -->
+        <div class="col-lg-7">
+            <div class="case-card p-4 p-md-5">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                    <span class="stamp-badge">إصدار بوارو الرسمي</span>
+                    <span class="small text-muted"><i class="fa-solid fa-qrcode text-poirot-blue ms-1"></i> تشمل بوابة التحقق والحلول</span>
+                </div>
+
+                <h1 class="h2 fw-bold text-poirot-blue mb-2">@Model.Title</h1>
+                <p class="text-muted mb-4 leading-relaxed">@Model.ShortDescription</p>
+
+                <!-- مربع السعر وحالة المخزون الديناميكي -->
+                <div class="price-display-box p-3 px-4 rounded-3 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <small class="text-muted d-block" id="selectedEditionLabel">سعر النسخة المختارة</small>
+                        <div class="d-flex align-items-baseline gap-2">
+                            <span id="dynamicPrice" class="display-6 fw-bold text-poirot-blue">
+                                @(defaultEdition == "physical" ? Model.PhysicalPrice.ToString("N0") : Model.DigitalPrice.ToString("0.##"))
+                            </span>
+                            <span id="dynamicCurrency" class="fs-5 fw-bold text-poirot-blue">
+                                @(defaultEdition == "physical" ? "ل.س" : "$")
+                            </span>
+                        </div>
+                    </div>
+                    <div id="stockStatusBadge">
+                        <!-- يُملأ تلقائياً عبر الجافاسكربت -->
+                    </div>
+                </div>
+
+                <!-- أزرار التبديل التفاعلي: نسخة ورقية مقابل نسخة إلكترونية -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-dark mb-2">اختر نوع النسخة المطلوبة:</label>
+                    <div class="row g-3" id="editionSelector">
+
+                        @if (Model.IsPhysicalAvailable)
+                        {
+                            <div class="col-sm-6">
+                                <button type="button"
+                                        class="edition-toggle-btn w-100 text-end p-3 @(defaultEdition == "physical" ? "active" : "")"
+                                        data-edition="physical"
+                                        data-edition-enum="1"
+                                        data-price="@physicalPriceInv"
+                                        data-stock="@Model.PhysicalStock"
+                                        data-label="النسخة الورقية (شحن وتوصيل للمنزل)"
+                                        data-note="تصلك القضية مطبوعة بالكامل داخل ظرف مختوم مع كافة الوثائق والصور والأختام إلى عنوانك.">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-bold text-poirot-blue">
+                                            <i class="fa-solid fa-box-open ms-1"></i> نسخة ورقية
+                                        </span>
+                                        <span class="fw-bold text-dark">@Model.PhysicalPrice.ToString("N0") ل.س</span>
+                                    </div>
+                                    <div class="small text-muted">
+                                        شحن للمنزل • ملف مطبوع ومختوم
+                                    </div>
+                                </button>
+                            </div>
+                        }
+
+                        @if (Model.IsDigitalAvailable)
+                        {
+                            <div class="col-sm-6">
+                                <button type="button"
+                                        class="edition-toggle-btn w-100 text-end p-3 @(defaultEdition == "digital" ? "active" : "")"
+                                        data-edition="digital"
+                                        data-edition-enum="2"
+                                        data-price="@digitalPriceInv"
+                                        data-stock="999"
+                                        data-label="النسخة الإلكترونية (ملفات PDF فورية)"
+                                        data-note="تستلم ملفات القضية بصيغة PDF عالية الدقة فور تأكيد الطلب لتصفحها على شاشتك أو طباعتها في المنزل بدون انتظار الشحن.">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-bold text-dark">
+                                            <i class="fa-solid fa-file-pdf ms-1 text-poirot-blue"></i> نسخة إلكترونية
+                                        </span>
+                                        <span class="fw-bold text-dark">@Model.DigitalPrice.ToString("0.##") $</span>
+                                    </div>
+                                    <div class="small text-muted">
+                                        استلام فوري (PDF) • بدون شحن
+                                    </div>
+                                </button>
+                            </div>
+                        }
+
+                    </div>
+
+                    <!-- ملاحظة ديناميكية تشرح النسخة المختارة -->
+                    <div id="editionNoteBox" class="alert alert-light border mt-3 mb-0 small text-muted py-2 px-3">
+                        <i class="fa-solid fa-circle-info text-poirot-blue ms-1"></i>
+                        <span id="editionNoteText"></span>
+                    </div>
+                </div>
+
+                <!-- نموذج الإضافة لحقيبة القضايا -->
+                <form asp-controller="Cart" asp-action="Add" method="post" id="addToCartForm" class="border-top pt-4">
+                    <input type="hidden" name="caseId" value="@Model.Id" />
+                    <input type="hidden" name="edition" id="selectedEditionInput" value="@(defaultEdition == "physical" ? 1 : 2)" />
+
+                    <div class="row g-3 align-items-center">
+                        <div class="col-5 col-sm-4" id="quantityWrapper">
+                            <label class="form-label small fw-bold text-muted mb-1">الكمية</label>
+                            <div class="input-group">
+                                <button type="button" class="btn btn-outline-secondary" id="qtyMinus">-</button>
+                                <input type="number" name="quantity" id="qtyInput" value="1" min="1" max="@Math.Max(1, Model.PhysicalStock)" class="form-control text-center fw-bold" readonly />
+                                <button type="button" class="btn btn-outline-secondary" id="qtyPlus">+</button>
+                            </div>
+                        </div>
+
+                        <div class="col-7 col-sm-8 align-self-end">
+                            <button type="submit" id="addToCartBtn" class="btn btn-poirot-blue btn-lg w-100 py-2">
+                                <i class="fa-solid fa-briefcase ms-2"></i> أضف إلى حقيبة القضايا
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- ملخص القضية (بدون حرق) -->
+                <div class="mt-5 pt-4 border-top">
+                    <h2 class="h5 fw-bold text-poirot-blue mb-3">
+                        <i class="fa-solid fa-file-lines ms-1"></i> موجز القضية (بدون حرق للأحداث)
+                    </h2>
+                    <p class="text-dark leading-relaxed mb-0" style="white-space: pre-line;">@Model.FullStory</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- قضايا أخرى قد تهمك (ربط داخلي للسيو) -->
+    @if (relatedCases.Any())
+    {
+        <div class="mt-5 pt-4 border-top">
+            <h2 class="h4 fw-bold text-poirot-blue mb-4">ملفات قضايا أخرى في أرشيف بوارو</h2>
+            <div class="row g-4">
+                @foreach (var rel in relatedCases)
+                {
+                    <div class="col-md-4">
+                        <div class="case-card p-3 h-100 d-flex align-items-center gap-3">
+                            <img src="@rel.CoverImageUrl" alt="@rel.Title" style="width: 72px; height: 72px; object-fit: contain;" class="bg-light rounded p-1" />
+                            <div class="flex-grow-1">
+                                <span class="badge bg-poirot-black text-white mb-1" style="font-size: 0.7rem;">@rel.CaseCode</span>
+                                <h3 class="h6 fw-bold mb-1">
+                                    <a asp-controller="Cases" asp-action="Details" asp-route-slug="@rel.Slug" class="text-dark">@rel.Title</a>
+                                </h3>
+                                <div class="small fw-bold">
+                                    @if (rel.IsPhysicalAvailable)
+                                    {
+                                        <span class="text-poirot-blue">@rel.PhysicalPrice.ToString("N0") ل.س</span>
+                                    }
+                                    @if (rel.IsPhysicalAvailable && rel.IsDigitalAvailable)
+                                    {
+                                        <span class="text-muted mx-1">|</span>
+                                    }
+                                    @if (rel.IsDigitalAvailable)
+                                    {
+                                        <span class="text-dark">@rel.DigitalPrice.ToString("0.##") $</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // 1. تبديل الصور المصغرة في معرض القضية
+            const mainImg = document.getElementById("mainCaseImage");
+            const mainCaption = document.getElementById("mainImageCaption");
+            const thumbs = document.querySelectorAll(".gallery-thumb");
+
+            thumbs.forEach(btn => {
+                btn.addEventListener("click", function () {
+                    thumbs.forEach(t => t.classList.remove("active"));
+                    this.classList.add("active");
+                    mainImg.src = this.dataset.src;
+                    mainCaption.textContent = this.dataset.caption || "";
+                });
+            });
+
+            // 2. التبديل التفاعلي بين النسخة الورقية (ل.س) والنسخة الإلكترونية ($)
+            const editionButtons = document.querySelectorAll(".edition-toggle-btn");
+            const dynamicPriceEl = document.getElementById("dynamicPrice");
+            const dynamicCurrencyEl = document.getElementById("dynamicCurrency");
+            const selectedLabelEl = document.getElementById("selectedEditionLabel");
+            const stockBadgeEl = document.getElementById("stockStatusBadge");
+            const editionNoteTextEl = document.getElementById("editionNoteText");
+            const selectedEditionInput = document.getElementById("selectedEditionInput");
+            const qtyInput = document.getElementById("qtyInput");
+            const qtyMinus = document.getElementById("qtyMinus");
+            const qtyPlus = document.getElementById("qtyPlus");
+            const addToCartBtn = document.getElementById("addToCartBtn");
+
+            let currentMaxStock = 1;
+            let currentEditionType = "physical";
+
+            function applyEditionState(btn) {
+                if (!btn) return;
+
+                editionButtons.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+
+                currentEditionType = btn.dataset.edition;
+                const price = parseFloat(btn.dataset.price);
+                const stock = parseInt(btn.dataset.stock, 10);
+
+                // تحديث السعر والعملة حسب النسخة
+                if (currentEditionType === "physical") {
+                    dynamicPriceEl.textContent = Math.round(price).toLocaleString("en-US");
+                    if (dynamicCurrencyEl) dynamicCurrencyEl.textContent = "ل.س";
+                } else {
+                    dynamicPriceEl.textContent = Number.isInteger(price) ? price : price.toFixed(2);
+                    if (dynamicCurrencyEl) dynamicCurrencyEl.textContent = "$";
+                }
+
+                selectedLabelEl.textContent = btn.dataset.label;
+                editionNoteTextEl.textContent = btn.dataset.note;
+                selectedEditionInput.value = btn.dataset.editionEnum;
+
+                // تحديث حالة المخزون والكمية وزر الشراء
+                if (currentEditionType === "physical") {
+                    if (stock > 0) {
+                        currentMaxStock = stock;
+                        qtyInput.value = 1;
+                        qtyInput.max = stock;
+                        qtyMinus.disabled = false;
+                        qtyPlus.disabled = false;
+                        addToCartBtn.disabled = false;
+                        addToCartBtn.innerHTML = '<i class="fa-solid fa-briefcase ms-2"></i> أضف النسخة الورقية للحقيبة';
+
+                        const stockText = stock <= 5
+                            ? `متوفر (${stock} نسخ فقط متبقية!)`
+                            : `متوفر للشحن (${stock} نسخة بالمخزون)`;
+
+                        stockBadgeEl.innerHTML = `<span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2"><i class="fa-solid fa-check-circle ms-1"></i> ${stockText}</span>`;
+                    } else {
+                        currentMaxStock = 0;
+                        qtyInput.value = 1;
+                        qtyMinus.disabled = true;
+                        qtyPlus.disabled = true;
+                        addToCartBtn.disabled = true;
+                        addToCartBtn.innerHTML = '<i class="fa-solid fa-ban ms-2"></i> النسخة الورقية غير متوفرة حالياً';
+                        stockBadgeEl.innerHTML = `<span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2"><i class="fa-solid fa-circle-xmark ms-1"></i> نفذت الكمية الورقية - جرب الإلكترونية</span>`;
+                    }
+                } else {
+                    currentMaxStock = 1;
+                    qtyInput.value = 1;
+                    qtyInput.max = 1;
+                    qtyMinus.disabled = true;
+                    qtyPlus.disabled = true;
+                    addToCartBtn.disabled = false;
+                    addToCartBtn.innerHTML = '<i class="fa-solid fa-bolt ms-2"></i> أضف النسخة الإلكترونية للحقيبة';
+                    stockBadgeEl.innerHTML = `<span class="badge bg-poirot-blue text-white px-3 py-2"><i class="fa-solid fa-bolt ms-1"></i> استلام فوري (PDF) بدون شحن</span>`;
+                }
+            }
+
+            editionButtons.forEach(btn => {
+                btn.addEventListener("click", () => applyEditionState(btn));
+            });
+
+            const initialBtn = document.querySelector(".edition-toggle-btn.active") || editionButtons[0];
+            applyEditionState(initialBtn);
+
+            qtyPlus.addEventListener("click", function () {
+                let val = parseInt(qtyInput.value, 10) || 1;
+                if (val < currentMaxStock) qtyInput.value = val + 1;
+            });
+
+            qtyMinus.addEventListener("click", function () {
+                let val = parseInt(qtyInput.value, 10) || 1;
+                if (val > 1) qtyInput.value = val - 1;
+            });
+        });
+    </script>
+}

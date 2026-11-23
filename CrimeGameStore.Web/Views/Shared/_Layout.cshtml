@@ -1,0 +1,202 @@
+﻿@inject CrimeGameStore.Web.Services.ISiteSettingsService SettingsService
+@{
+    var settings = await SettingsService.GetSettingsAsync();
+    var siteName = settings.SiteName;
+    var pageTitle = ViewData["Title"] != null ? $"{ViewData["Title"]} - {siteName}" : $"{siteName} | {settings.SiteSubtitle}";
+    var metaDescription = ViewData["MetaDescription"]?.ToString() ?? settings.DefaultMetaDescription;
+    var metaKeywords = ViewData["MetaKeywords"]?.ToString() ?? settings.DefaultMetaKeywords;
+    var ogImage = ViewData["OgImage"]?.ToString() ?? $"{Context.Request.Scheme}://{Context.Request.Host}{settings.LogoUrl}";
+    var currentUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
+
+    var phoneDisplay = settings.PhoneDisplay;
+    var waNumber = settings.WhatsAppNumber;
+}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@pageTitle</title>
+    <meta name="description" content="@metaDescription" />
+    <meta name="keywords" content="@metaKeywords" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="@currentUrl" />
+    <link rel="icon" type="image/png" href="@settings.LogoUrl" />
+
+    <!-- وسوم المشاركة على وسائل التواصل (Open Graph / WhatsApp / Facebook) -->
+    <meta property="og:locale" content="ar_AR" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="@siteName" />
+    <meta property="og:title" content="@pageTitle" />
+    <meta property="og:description" content="@metaDescription" />
+    <meta property="og:url" content="@currentUrl" />
+    <meta property="og:image" content="@ogImage" />
+
+    <!-- بيانات منظمة لمحرك بحث جوجل (Schema.org JSON-LD) -->
+    <script type="application/ld+json">
+        {
+          "@@context": "https://schema.org",
+          "@@type": "Brand",
+          "name": "@siteName",
+          "description": "@metaDescription",
+          "logo": "@ogImage",
+          "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}")"
+        }
+    </script>
+
+    <!-- الخطوط العربية (Cairo + Changa) و Bootstrap RTL وأيقونات FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Changa:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- ملف التصميم الخاص بهوية بوارو -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="poirot-body d-flex flex-column min-vh-100">
+
+    <!-- شريط التنويه العلوي (قابل للتعديل من لوحة الأدمن) -->
+    <div class="top-announcement text-center py-2 px-3">
+        <span>
+            <i class="fa-solid fa-magnifying-glass ms-1"></i>
+            @settings.TopAnnouncement
+        </span>
+    </div>
+
+    <!-- القائمة الرئيسية (Navbar) -->
+    <header class="sticky-top">
+        <nav class="navbar navbar-expand-lg poirot-navbar py-2">
+            <div class="container">
+                <!-- شعار الموقع -->
+                <a class="navbar-brand d-flex align-items-center gap-2 py-0" asp-controller="Home" asp-action="Index">
+                    <img src="@settings.LogoUrl" alt="شعار @settings.SiteName" class="poirot-logo" />
+                    <div class="d-flex flex-column border-end pe-3 me-1 border-secondary border-opacity-25">
+                        <span class="brand-title">@settings.SiteName</span>
+                        <small class="brand-subtitle">@settings.SiteSubtitle</small>
+                    </div>
+                </a>
+
+                <!-- زر القائمة للموبايل -->
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="تبديل القائمة">
+                    <i class="fa-solid fa-bars fs-4 text-poirot-blue"></i>
+                </button>
+
+                <!-- روابط الصفحات -->
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">الرئيسية</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Cases" asp-action="Index">القضايا المتوفرة</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="HowToPlay">كيف تلعب؟</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Faq">الأسئلة الشائعة</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Contact">تواصل معنا</a>
+                        </li>
+                    </ul>
+
+                    <!-- أزرار السلة والبدء -->
+                    <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                        <a asp-controller="Cart" asp-action="Index" class="btn btn-poirot-outline position-relative" aria-label="حقيبة القضايا">
+                            <i class="fa-solid fa-briefcase ms-1"></i> حقيبة القضايا
+                            <span id="cartCountBadge" class="badge rounded-pill bg-poirot-black text-white ms-1">0</span>
+                        </a>
+                        <a asp-controller="Cases" asp-action="Index" class="btn btn-poirot-blue">
+                            اطلب قضيتك الآن
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- محتوى الصفحة المتغير -->
+    <main role="main" class="flex-grow-1">
+        @RenderBody()
+    </main>
+
+    <!-- التذييل (Footer) -->
+    <!-- التذييل (Footer) -->
+    <footer class="poirot-footer pt-5 pb-4 mt-5">
+        <div class="container">
+            <div class="row g-4 pb-4 border-bottom border-light border-opacity-10">
+                <!-- العمود الأول: الشعار والنبذة -->
+                <div class="col-lg-5">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="footer-logo-box bg-white p-2 rounded-3">
+                            <img src="@settings.LogoUrl" alt="@settings.SiteName" style="height: 52px; width: auto;" />
+                        </div>
+                        <div>
+                            <h5 class="mb-0 text-white fw-bold">@settings.SiteName</h5>
+                            <small class="text-light opacity-75">@settings.SiteSubtitle</small>
+                        </div>
+                    </div>
+                    <p class="text-light opacity-75 small leading-relaxed mb-0">
+                        @settings.FooterAbout
+                    </p>
+                </div>
+
+                <!-- العمود الثاني: أقسام الموقع -->
+                <div class="col-sm-6 col-lg-3">
+                    <h6 class="text-white fw-bold mb-3 d-inline-block border-end border-3 border-white pe-2">أقسام الموقع</h6>
+                    <ul class="list-unstyled footer-links d-flex flex-column gap-2 small mb-0">
+                        <li><a asp-controller="Home" asp-action="Index">الصفحة الرئيسية</a></li>
+                        <li><a asp-controller="Cases" asp-action="Index">القضايا المتوفرة</a></li>
+                        <li><a asp-controller="Home" asp-action="HowToPlay">كيف تعمل اللعبة؟</a></li>
+                        <li><a asp-controller="Home" asp-action="Faq">الأسئلة الشائعة والتوصيل</a></li>
+                        <li><a asp-controller="Home" asp-action="Contact">تواصل معنا</a></li>
+                    </ul>
+                </div>
+
+                <!-- العمود الثالث: تابعنا وتواصل معنا (أيقونات مرتبة تحت بعضها وبالمنتصف) -->
+                <div class="col-sm-6 col-lg-4 text-center">
+                    <h6 class="text-white fw-bold mb-3 d-inline-block border-end border-3 border-white pe-2">تابعنا وتواصل معنا</h6>
+                    <p class="text-light opacity-75 small mb-3">
+                        تواصل معنا مباشرة أو تابع أحدث القضايا والألغاز على حساباتنا الرسمية:
+                    </p>
+
+                    <div class="d-flex flex-column align-items-center gap-2">
+                        @if (!string.IsNullOrWhiteSpace(phoneDisplay))
+                        {
+                            <a href="tel:@phoneDisplay.Replace(" ", "")" class="footer-social-btn social-phone" aria-label="اتصال مباشر" title="اتصال مباشر">
+                                <i class="fa-solid fa-phone"></i>
+                            </a>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(waNumber))
+                        {
+                            <a href="https://wa.me/@waNumber" target="_blank" rel="noopener" class="footer-social-btn social-wa" aria-label="واتساب" title="واتساب">
+                                <i class="fa-brands fa-whatsapp"></i>
+                            </a>
+                        }
+                        <a href="@(string.IsNullOrWhiteSpace(settings.FacebookUrl) ? "#" : settings.FacebookUrl)" target="_blank" rel="noopener" class="footer-social-btn social-fb" aria-label="فيسبوك" title="فيسبوك">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+                        <a href="@(string.IsNullOrWhiteSpace(settings.InstagramUrl) ? "#" : settings.InstagramUrl)" target="_blank" rel="noopener" class="footer-social-btn social-ig" aria-label="إنستغرام" title="إنستغرام">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center pt-3 small text-light opacity-75">
+                <div>&copy; @DateTime.Now.Year <strong>@settings.SiteName</strong> - جميع الحقوق محفوظة.</div>
+                <div class="mt-2 mt-md-0">صُمم لأصحاب الذكاء العالي وعشاق التحقيق الجنائي</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- مكتبات الجافاسكربت -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

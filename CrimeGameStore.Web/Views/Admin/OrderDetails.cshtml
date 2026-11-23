@@ -1,0 +1,116 @@
+﻿@using CrimeGameStore.Web.Models
+@model Order
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = $"تفاصيل الطلب {Model.OrderNumber}";
+    var cleanPhone = Model.PhoneNumber.Replace(" ", "").Replace("+", "");
+    if (cleanPhone.StartsWith("09")) cleanPhone = "963" + cleanPhone[1..];
+
+    var totalSyp = Model.Items.Where(i => i.Edition == EditionType.Physical).Sum(i => i.UnitPrice * i.Quantity);
+    var totalUsd = Model.Items.Where(i => i.Edition == EditionType.Digital).Sum(i => i.UnitPrice * i.Quantity);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h4 fw-bold text-poirot mb-0">الطلب رقم <span dir="ltr">@Model.OrderNumber</span></h1>
+    <a asp-action="Orders" class="btn btn-outline-secondary btn-sm">العودة للطلبات</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="admin-card p-4 mb-4">
+            <h2 class="h6 fw-bold text-poirot border-bottom pb-2 mb-3">بيانات المشتري والشحن</h2>
+            <div class="row g-2 small">
+                <div class="col-md-6"><strong>الاسم:</strong> @Model.CustomerName</div>
+                <div class="col-md-6">
+                    <strong>الهاتف:</strong> <span dir="ltr">@Model.PhoneNumber</span>
+                    <a href="https://wa.me/@cleanPhone" target="_blank" class="btn btn-sm btn-success py-0 px-2 me-2">
+                        <i class="fa-brands fa-whatsapp"></i> واتساب
+                    </a>
+                </div>
+                <div class="col-md-6"><strong>البريد:</strong> @(Model.Email ?? "—")</div>
+                <div class="col-md-6"><strong>طريقة الدفع:</strong> @(Model.PaymentMethod == PaymentMethod.ShamCashDepositAndCod ? "رعبون شام كاش + الباقي عند الاستلام" : "دفع كامل عبر شام كاش")</div>
+                <div class="col-md-6"><strong>مرجع شام كاش:</strong> @(Model.PaymentReference ?? "لم يُدخل بعد")</div>
+                <div class="col-md-6"><strong>التاريخ:</strong> <span dir="ltr">@Model.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span></div>
+                @if (!string.IsNullOrWhiteSpace(Model.ShippingAddress))
+                {
+                    <div class="col-12 mt-2 p-2 bg-light rounded">
+                        <strong>عنوان الشحن:</strong> @Model.City — @Model.ShippingAddress
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                {
+                    <div class="col-12 mt-2"><strong>ملاحظات العميل:</strong> @Model.Notes</div>
+                }
+            </div>
+        </div>
+
+        <div class="admin-card p-4">
+            <h2 class="h6 fw-bold text-poirot border-bottom pb-2 mb-3">القضايا المطلوبة</h2>
+            <table class="table table-sm small mb-0">
+                <thead>
+                    <tr>
+                        <th>القضية</th>
+                        <th>النوع</th>
+                        <th>الكمية</th>
+                        <th>السعر</th>
+                        <th>المجموع</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        var unitText = item.Edition == EditionType.Physical
+                        ? $"{item.UnitPrice:N0} ل.س"
+                        : $"{item.UnitPrice:0.##} $";
+                        var lineText = item.Edition == EditionType.Physical
+                        ? $"{(item.UnitPrice * item.Quantity):N0} ل.س"
+                        : $"{(item.UnitPrice * item.Quantity):0.##} $";
+
+                        <tr>
+                            <td class="fw-bold">@(item.CrimeCase?.Title ?? $"قضية #{item.CrimeCaseId}")</td>
+                            <td>@(item.Edition == EditionType.Physical ? "نسخة ورقية" : "نسخة إلكترونية PDF")</td>
+                            <td>@item.Quantity</td>
+                            <td>@unitText</td>
+                            <td class="fw-bold">@lineText</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="table-light">
+                        <td colspan="4" class="fw-bold text-end">الإجمالي الكلي:</td>
+                        <td class="fw-bold fs-6">
+                            @if (totalSyp > 0)
+                            {
+                                <div class="text-poirot">@totalSyp.ToString("N0") ل.س</div>
+                            }
+                            @if (totalUsd > 0)
+                            {
+                                <div class="text-dark">@totalUsd.ToString("0.##") $</div>
+                            }
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="admin-card p-4">
+            <h2 class="h6 fw-bold text-poirot border-bottom pb-2 mb-3">تحديث حالة الطلب</h2>
+            <form asp-action="UpdateOrderStatus" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">الحالة الحالية</label>
+                    <select name="status" class="form-select">
+                        <option value="1" selected="@(Model.Status == OrderStatus.Pending)">جديد (بانتظار تأكيد شام كاش)</option>
+                        <option value="2" selected="@(Model.Status == OrderStatus.Confirmed)">مؤكد وجاري التجهيز</option>
+                        <option value="3" selected="@(Model.Status == OrderStatus.Shipped)">قيد التوصيل (للورقي)</option>
+                        <option value="4" selected="@(Model.Status == OrderStatus.Completed)">مكتمل / تم التسليم</option>
+                        <option value="5" selected="@(Model.Status == OrderStatus.Cancelled)">ملغي (يُعيد المخزون تلقائياً)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-poirot w-100">حفظ الحالة الجديدة</button>
+            </form>
+        </div>
+    </div>
+</div>

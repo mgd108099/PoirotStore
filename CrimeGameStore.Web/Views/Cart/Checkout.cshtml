@@ -1,0 +1,300 @@
+﻿@using System.Text.Json
+@using CrimeGameStore.Web.Models
+@model CrimeGameStore.Web.Models.CheckoutViewModel
+@inject CrimeGameStore.Web.Services.ISiteSettingsService SettingsService
+
+@{
+    var settings = await SettingsService.GetSettingsAsync();
+    ViewData["Title"] = "إتمام الطلب";
+    bool hasPhysical = Model.Cart.HasPhysicalItems;
+    bool hasDigital = Model.Cart.HasDigitalItems;
+
+    var totalSyp = Model.Cart.Items.Where(i => i.Edition == EditionType.Physical).Sum(i => i.LineTotal);
+    var totalUsd = Model.Cart.Items.Where(i => i.Edition == EditionType.Digital).Sum(i => i.LineTotal);
+}
+
+<section class="poirot-page-header py-4">
+    <div class="container text-center">
+        <h1 class="h3 fw-bold text-white mb-1">تأكيد وإتمام الطلب</h1>
+        <p class="small text-light opacity-75 mb-0">
+            @(hasPhysical
+                        ? "أدخل بيانات التواصل وعنوان الشحن لتوصيل ملفاتك الورقية"
+                        : "طلبك إلكتروني بالكامل — نحتاج فقط بيانات التواصل لإرسال ملفات القضية فوراً")
+        </p>
+    </div>
+</section>
+
+<section class="py-5 container">
+    <div class="row g-4 align-items-start">
+
+        <!-- نموذج بيانات المشتري -->
+        <div class="col-lg-7">
+            <div class="case-card p-4 p-md-5">
+                <form asp-controller="Cart" asp-action="Checkout" method="post" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger small mb-4"></div>
+
+                    <!-- تنبيه ذكي حسب نوع الطلب -->
+                    @if (!hasPhysical && hasDigital)
+                    {
+                        <div class="alert bg-poirot-blue text-white border-0 small mb-4 d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-bolt fs-5"></i>
+                            <div>
+                                <strong>طلب رقمي سريع:</strong> لا حاجة لإدخال عنوان شحن؛ سنرسل لك ملفات القضية (PDF) مباشرة على رقم الواتساب أو البريد الإلكتروني فور تأكيد تحويل شام كاش.
+                            </div>
+                        </div>
+                    }
+                    else if (hasPhysical && hasDigital)
+                    {
+                        <div class="alert alert-info small mb-4">
+                            <i class="fa-solid fa-circle-info ms-1"></i>
+                            حقيبتك تضم <strong>نسخاً ورقية وإلكترونية معاً</strong>؛ سيتم شحن النسخ الورقية لعنوانك وإرسال النسخ الإلكترونية لرقم الواتساب/البريد المسجل.
+                        </div>
+                    }
+
+                    <!-- القسم الأول: بيانات التواصل الأساسية -->
+                    <h2 class="h5 fw-bold text-poirot-blue border-bottom pb-2 mb-3">
+                        <i class="fa-solid fa-user-check ms-1"></i> 1. بيانات المحقق (التواصل)
+                    </h2>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="CustomerName" class="form-label small fw-bold"></label> <span class="text-danger">*</span>
+                            <input asp-for="CustomerName" class="form-control" placeholder="الاسم والكنية" />
+                            <span asp-validation-for="CustomerName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="PhoneNumber" class="form-label small fw-bold"></label> <span class="text-danger">*</span>
+                            <input asp-for="PhoneNumber" class="form-control" dir="ltr" placeholder="09xxxxxxxx" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Email" class="form-label small fw-bold">
+                                البريد الإلكتروني @(hasDigital ? "(مفضل لاستلام ملفات PDF)" : "(اختياري)")
+                            </label>
+                            <input asp-for="Email" class="form-control" dir="ltr" placeholder="name@example.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- القسم الثاني: بيانات الشحن (يظهر فقط عند وجود نسخة ورقية) -->
+                    @if (hasPhysical)
+                    {
+                        <h2 class="h5 fw-bold text-poirot-blue border-bottom pb-2 mb-3">
+                            <i class="fa-solid fa-truck-fast ms-1"></i> 2. عنوان الشحن للنسخة الورقية
+                        </h2>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-5">
+                                <label asp-for="City" class="form-label small fw-bold"></label> <span class="text-danger">*</span>
+                                <input asp-for="City" class="form-control" placeholder="مثال: حماة، دمشق، حلب..." />
+                                <span asp-validation-for="City" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-7">
+                                <label asp-for="ShippingAddress" class="form-label small fw-bold"></label> <span class="text-danger">*</span>
+                                <input asp-for="ShippingAddress" class="form-control" placeholder="الحي، الشارع، أقرب معلم معروف، البناء..." />
+                                <span asp-validation-for="ShippingAddress" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- قسم الدفع عبر شام كاش (مربوط بإعدادات الأدمن) -->
+                    <h2 class="h5 fw-bold text-poirot-blue border-bottom pb-2 mb-3">
+                        <i class="fa-solid fa-wallet ms-1"></i> @(hasPhysical ? "3." : "2.") الدفع عبر شام كاش (Sham Cash)
+                    </h2>
+
+                    <div class="p-3 rounded-3 border bg-light mb-3">
+                        @if (hasPhysical)
+                        {
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="@PaymentMethod.ShamCashDepositAndCod" id="payDeposit" />
+                                <label class="form-check-label fw-bold text-poirot-blue" for="payDeposit">
+                                    رعبون عبر شام كاش + الباقي عند الاستلام
+                                </label>
+                                <div class="small text-muted me-4">
+                                    @settings.DepositNote
+                                </div>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="@PaymentMethod.ShamCashFull" id="payFull" />
+                                <label class="form-check-label fw-bold text-dark" for="payFull">
+                                    الدفع الكامل عبر شام كاش
+                                </label>
+                                <div class="small text-muted me-4">
+                                    ادفع كامل قيمة الطلب مسبقاً واستلم الطرد مباشرة بدون دفع عند المندوب.
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" asp-for="PaymentMethod" value="@PaymentMethod.ShamCashFull" />
+                            <div class="fw-bold text-poirot-blue mb-1">
+                                <i class="fa-solid fa-circle-check ms-1"></i> الدفع الكامل عبر شام كاش (Sham Cash)
+                            </div>
+                            <div class="small text-muted">
+                                يتم إرسال ملفات القضية الرقمية (PDF) مباشرة فور تأكيد التحويل.
+                            </div>
+                        }
+
+                        <!-- بطاقة معلومات التحويل والباركود -->
+                        <div class="mt-3 p-3 bg-white rounded-3 border border-primary-subtle small">
+                            <div class="row align-items-center g-3">
+                                <div class="col-sm-7">
+                                    <div class="fw-bold text-dark mb-1">
+                                        <i class="fa-solid fa-building-columns text-poirot-blue ms-1"></i> حساب شام كاش المعتمد:
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap my-2">
+                                        <span id="shamCashAccountText" class="fw-bold text-poirot-blue small text-break user-select-all" dir="ltr">
+                                            @settings.ShamCashAccount
+                                        </span>
+                                        <button type="button" id="copyShamCashBtn" class="btn btn-sm btn-outline-secondary py-0 px-2" title="نسخ الحساب">
+                                            <i class="fa-regular fa-copy ms-1"></i> نسخ
+                                        </button>
+                                    </div>
+                                    <div class="text-muted leading-relaxed">
+                                        امسح الباركود مباشرة من تطبيق <strong>شام كاش</strong>، أو احفظ الصورة واستوردها من الاستوديو، ثم أرسل لنا إشعار التحويل عبر واتساب في الصفحة التالية.
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-5 text-center">
+                                    <div class="d-inline-block p-2 bg-white border rounded-3 shadow-sm">
+                                        <div id="shamCashQrContainer"></div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button type="button"
+                                                id="downloadQrBtn"
+                                                class="btn btn-sm btn-poirot-outline py-1 px-2"
+                                                style="font-size: 0.78rem;">
+                                            <i class="fa-solid fa-download ms-1"></i> حفظ الباركود للجوال
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="PaymentReference" class="form-label small fw-bold"></label>
+                        <input asp-for="PaymentReference" class="form-control" placeholder="مثال: رقم العملية أو الاسم المحوّل منه (اختياري الآن)" />
+                    </div>
+
+                    <!-- ملاحظات إضافية -->
+                    <div class="mb-4">
+                        <label asp-for="Notes" class="form-label small fw-bold">ملاحظات إضافية حول الطلب أو وقت التوصيل (اختياري)</label>
+                        <textarea asp-for="Notes" class="form-control" rows="2" placeholder="أي تفاصيل تود إخبارنا بها..."></textarea>
+                    </div>
+
+                    <div class="d-flex flex-column flex-sm-row gap-2">
+                        <button type="submit" class="btn btn-poirot-blue btn-lg flex-grow-1">
+                            <i class="fa-solid fa-check-double ms-1"></i> تأكيد وإرسال الطلب
+                        </button>
+                        <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                            رجوع للحقيبة
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ملخص الحقيبة على الجانب -->
+        <div class="col-lg-5">
+            <div class="case-card p-4">
+                <h2 class="h5 fw-bold text-poirot-blue border-bottom pb-3 mb-3">ملخص حقيبة القضايا</h2>
+
+                <div class="d-flex flex-column gap-3 mb-3">
+                    @foreach (var item in Model.Cart.Items)
+                    {
+                        var lineTotalText = item.Edition == EditionType.Physical
+                        ? $"{item.LineTotal:N0} ل.س"
+                        : $"{item.LineTotal:0.##} $";
+
+                        <div class="d-flex justify-content-between align-items-center small border-bottom pb-2">
+                            <div>
+                                <div class="fw-bold text-dark">@item.Title</div>
+                                <span class="text-muted">
+                                    @(item.Edition == EditionType.Physical ? "نسخة ورقية" : "نسخة إلكترونية")
+                                    × @item.Quantity
+                                </span>
+                            </div>
+                            <strong class="text-poirot-blue">@lineTotalText</strong>
+                        </div>
+                    }
+                </div>
+
+                <div class="pt-2">
+                    <div class="fw-bold text-dark mb-2">المجموع الكلي:</div>
+                    @if (totalSyp > 0)
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small text-muted">النسخ الورقية:</span>
+                            <span class="h5 fw-bold text-poirot-blue mb-0">@totalSyp.ToString("N0") ل.س</span>
+                        </div>
+                    }
+                    @if (totalUsd > 0)
+                    {
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small text-muted">النسخ الإلكترونية:</span>
+                            <span class="h5 fw-bold text-dark mb-0">@totalUsd.ToString("0.##") $</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        function renderShamCashQr(containerId, accountText, downloadBtnId) {
+            const container = document.getElementById(containerId);
+            if (!container || !accountText) return;
+
+            container.innerHTML = "";
+            new QRCode(container, {
+                text: accountText,
+                width: 155,
+                height: 155,
+                colorDark: "#0b2d56",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            const downloadBtn = document.getElementById(downloadBtnId);
+            if (downloadBtn) {
+                downloadBtn.addEventListener("click", function () {
+                    const canvas = container.querySelector("canvas");
+                    const img = container.querySelector("img");
+                    const dataUrl = canvas ? canvas.toDataURL("image/png") : img?.src;
+                    if (!dataUrl) return;
+
+                    const link = document.createElement("a");
+                    link.href = dataUrl;
+                    link.download = "Poirot-ShamCash-QR.png";
+                    link.click();
+                });
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const accountText = @Html.Raw(JsonSerializer.Serialize(settings.ShamCashAccount ?? ""));
+            renderShamCashQr("shamCashQrContainer", accountText, "downloadQrBtn");
+
+            document.getElementById("copyShamCashBtn")?.addEventListener("click", function () {
+                if (!accountText) return;
+                navigator.clipboard.writeText(accountText).then(() => {
+                    const btn = this;
+                    btn.innerHTML = '<i class="fa-solid fa-check text-success ms-1"></i> تم النسخ';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="fa-regular fa-copy ms-1"></i> نسخ';
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+}

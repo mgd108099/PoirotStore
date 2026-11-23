@@ -1,0 +1,69 @@
+﻿@model IEnumerable<CrimeGameStore.Web.Models.FaqItem>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "إدارة الأسئلة الشائعة";
+}
+
+<h1 class="h4 fw-bold text-poirot mb-4">إدارة الأسئلة الشائعة (تظهر في صفحة كيف تلعب؟ + Google FAQ Schema)</h1>
+
+<!-- إضافة سؤال جديد -->
+<div class="admin-card p-4 mb-4">
+    <h2 class="h6 fw-bold text-poirot mb-3">إضافة سؤال جديد</h2>
+    <form asp-action="SaveFaq" method="post" class="row g-3">
+        <input type="hidden" name="Id" value="0" />
+        <input type="hidden" name="IsActive" value="true" />
+        <div class="col-md-9">
+            <label class="form-label small fw-bold">السؤال</label>
+            <input type="text" name="Question" class="form-control" required />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">الترتيب</label>
+            <input type="number" name="SortOrder" value="@(Model.Count() + 1)" class="form-control" />
+        </div>
+        <div class="col-12">
+            <label class="form-label small fw-bold">الإجابة</label>
+            <textarea name="Answer" class="form-control" rows="2" required></textarea>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-poirot">إضافة السؤال</button>
+        </div>
+    </form>
+</div>
+
+<!-- تعديل وحذف الأسئلة الحالية -->
+<div class="d-flex flex-column gap-3">
+    @foreach (var faq in Model)
+    {
+        <div class="admin-card p-3">
+            <form asp-action="SaveFaq" method="post" class="row g-2 align-items-end">
+                <input type="hidden" name="Id" value="@faq.Id" />
+                <div class="col-md-8">
+                    <label class="form-label small fw-bold">السؤال</label>
+                    <input type="text" name="Question" value="@faq.Question" class="form-control form-control-sm" required />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">الترتيب</label>
+                    <input type="number" name="SortOrder" value="@faq.SortOrder" class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="IsActive" value="true" @(faq.IsActive ? "checked" : "") />
+                        <label class="form-check-label small fw-bold">مفعّل</label>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <label class="form-label small fw-bold">الإجابة</label>
+                    <textarea name="Answer" class="form-control form-control-sm" rows="2" required>@faq.Answer</textarea>
+                </div>
+                <div class="col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-poirot flex-grow-1">حفظ</button>
+                    <button type="submit" formaction="@Url.Action("DeleteFaq", "Admin", new { id = faq.Id })"
+                            onclick="return confirm('حذف هذا السؤال؟');"
+                            class="btn btn-sm btn-outline-danger">
+                        حذف
+                    </button>
+                </div>
+            </form>
+        </div>
+    }
+</div>

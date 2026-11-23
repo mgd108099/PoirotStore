@@ -1,0 +1,163 @@
+﻿@model IEnumerable<CrimeGameStore.Web.Models.CrimeCase>
+
+@{
+    ViewData["Title"] = "ملفات القضايا (المتجر)";
+    ViewData["MetaDescription"] = "تصفح جميع قضايا التحقيق الجنائي من بوارو (Poirot). اختر مستوى الصعوبة واطلب قضيتك بنسخة ورقية مطبوعة أو نسخة إلكترونية فورية.";
+    ViewData["MetaKeywords"] = "متجر بوارو, شراء لعبة تحقيقات جنائية, قضايا بوارو, ألعاب غموض ورقية, قضايا PDF";
+
+    var currentSearch = ViewData["CurrentSearch"]?.ToString();
+    var currentDifficulty = ViewData["CurrentDifficulty"]?.ToString() ?? "الكل";
+    var currentEdition = ViewData["CurrentEdition"]?.ToString() ?? "all";
+    var difficulties = new[] { "الكل", "سهل", "متوسط", "صعب", "للمحترفين" };
+}
+
+<!-- ترويسة المتجر -->
+<section class="poirot-page-header py-5">
+    <div class="container text-center">
+        <nav aria-label="breadcrumb" class="d-flex justify-content-center mb-2">
+            <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-light opacity-75">الرئيسية</a></li>
+                <li class="breadcrumb-item active text-white fw-bold" aria-current="page">ملفات القضايا</li>
+            </ol>
+        </nav>
+        <h1 class="display-6 fw-bold text-white mb-2">أرشيف قضايا بوارو المفتوحة</h1>
+        <p class="lead text-light opacity-75 mx-auto mb-0" style="max-width: 640px;">
+            اختر ملف القضية الذي يتحدى ذكاءك، وحدد داخل الصفحة ما إذا كنت ترغب بالنسخة الورقية أو الإلكترونية.
+        </p>
+    </div>
+</section>
+
+<!-- شريط البحث والفلترة -->
+<section class="container mt-n4 position-relative" style="z-index: 5;">
+    <form asp-controller="Cases" asp-action="Index" method="get" class="filter-bar-card p-3 p-md-4 shadow-sm">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label small fw-bold text-poirot-blue mb-1">ابحث باسم القضية أو رمزها</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-start-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                    <input type="text" name="search" value="@currentSearch" class="form-control border-end-0" placeholder="مثال: السم النائم أو #511/B..." />
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <label class="form-label small fw-bold text-poirot-blue mb-1">مستوى الصعوبة</label>
+                <select name="difficulty" class="form-select">
+                    @foreach (var diff in difficulties)
+                    {
+                        <option value="@diff" selected="@(currentDifficulty == diff)">@diff</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold text-poirot-blue mb-1">نوع النسخة</label>
+                <select name="edition" class="form-select">
+                    <option value="all" selected="@(currentEdition == "all")">الكل</option>
+                    <option value="physical" selected="@(currentEdition == "physical")">ورقية متوفرة</option>
+                    <option value="digital" selected="@(currentEdition == "digital")">إلكترونية PDF</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-poirot-blue w-100">تصفية</button>
+                @if (!string.IsNullOrEmpty(currentSearch) || currentDifficulty != "الكل" || currentEdition != "all")
+                {
+                    <a asp-controller="Cases" asp-action="Index" class="btn btn-outline-secondary" title="إعادة ضبط الفلاتر">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </a>
+                }
+            </div>
+        </div>
+    </form>
+</section>
+
+<!-- شبكة عرض القضايا -->
+<section class="py-5 container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <span class="text-muted small">
+            عدد الملفات المطابقة: <strong class="text-poirot-blue">@Model.Count()</strong> قضية
+        </span>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <article class="case-card h-100 d-flex flex-column">
+                        <a asp-controller="Cases" asp-action="Details" asp-route-slug="@item.Slug" class="case-cover-wrapper position-relative d-flex align-items-center justify-content-center p-4">
+                            <img src="@item.CoverImageUrl" alt="قضية @item.Title من بوارو" class="case-cover-img" loading="lazy" />
+                            <span class="position-absolute top-0 end-0 m-3 badge bg-poirot-black text-white px-3 py-2">
+                                ملف @item.CaseCode
+                            </span>
+                            <span class="position-absolute top-0 start-0 m-3 badge bg-white text-poirot-blue border fw-bold px-2 py-1">
+                                @item.Difficulty
+                            </span>
+                        </a>
+
+                        <div class="p-4 d-flex flex-column flex-grow-1">
+                            <h2 class="h5 fw-bold mb-2">
+                                <a asp-controller="Cases" asp-action="Details" asp-route-slug="@item.Slug" class="text-dark">
+                                    @item.Title
+                                </a>
+                            </h2>
+
+                            <p class="text-muted small mb-3 flex-grow-1 leading-relaxed">
+                                @item.ShortDescription
+                            </p>
+
+                            <div class="d-flex justify-content-between text-muted small border-top border-bottom py-2 mb-3">
+                                <span><i class="fa-solid fa-users text-poirot-blue ms-1"></i> @item.PlayersCount</span>
+                                <span><i class="fa-regular fa-clock text-poirot-blue ms-1"></i> @item.EstimatedTime</span>
+                            </div>
+
+                            <!-- الأسعار وحالة التوفر -->
+                            <div class="d-flex justify-content-between align-items-center mb-3 bg-light rounded-3 p-2 px-3">
+                                @if (item.IsPhysicalAvailable)
+                                {
+                                    <div class="small">
+                                        <span class="text-muted d-block" style="font-size: 0.72rem;">
+                                            <i class="fa-solid fa-box text-poirot-blue"></i> ورقية
+                                        </span>
+                                        @if (item.PhysicalStock > 0)
+                                        {
+                                            <strong class="text-poirot-blue">@item.PhysicalPrice.ToString("N0") ل.س</strong>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">نفذت مؤقتاً</span>
+                                        }
+                                    </div>
+                                }
+
+                                @if (item.IsDigitalAvailable)
+                                {
+                                    <div class="small text-start">
+                                        <span class="text-muted d-block" style="font-size: 0.72rem;">
+                                            <i class="fa-solid fa-bolt text-dark"></i> إلكترونية
+                                        </span>
+                                        <strong class="text-dark">@item.DigitalPrice.ToString("0.##") $</strong>
+                                    </div>
+                                }
+                            </div>
+
+                            <a asp-controller="Cases" asp-action="Details" asp-route-slug="@item.Slug" class="btn btn-poirot-blue w-100">
+                                <i class="fa-solid fa-folder-open ms-1"></i> استعراض التفاصيل والطلب
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="case-card p-5 text-center">
+            <i class="fa-solid fa-folder-minus fs-1 text-poirot-blue opacity-50 mb-3"></i>
+            <h3 class="h5 fw-bold text-dark">لم نجد قضايا تطابق بحثك</h3>
+            <p class="text-muted small mb-3">جرب تغيير مستوى الصعوبة أو مسح كلمة البحث لعرض جميع ملفات بوارو.</p>
+            <a asp-controller="Cases" asp-action="Index" class="btn btn-poirot-outline">عرض جميع القضايا</a>
+        </div>
+    }
+</section>

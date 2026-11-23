@@ -1,0 +1,450 @@
+﻿:root {
+    --poirot-blue: #0b2d56; /* الأزرق الكحلي الأساسي المطابق للوغو بوارو */
+    --poirot-blue-hover: #071f3d; /* درجة أغمق عند التمرير */
+    --poirot-blue-light: #e8eff7; /* خلفية زرقاء فاتحة جداً للبطاقات والشارات */
+    --poirot-black: #111827; /* الأسود الفحمي للعناوين والتباين */
+    --poirot-white: #ffffff; /* الأبيض النقي */
+    --bg-page: #f8fafc; /* خلفية الصفحات (أبيض مائل للرمادي الفاتح جداً لراحة العين) */
+    --text-main: #111827;
+    --text-muted: #4b5563;
+    --border-color: #dbe3ed;
+}
+
+/* الإعدادات العامة */
+body.poirot-body {
+    background-color: var(--bg-page);
+    color: var(--text-main);
+    font-family: 'Cairo', sans-serif;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, .brand-title {
+    font-family: 'Changa', 'Cairo', sans-serif;
+}
+
+a {
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.leading-relaxed {
+    line-height: 1.8;
+}
+
+.text-poirot-blue {
+    color: var(--poirot-blue) !important;
+}
+
+.bg-poirot-blue {
+    background-color: var(--poirot-blue) !important;
+}
+
+.bg-poirot-black {
+    background-color: var(--poirot-black) !important;
+}
+
+/* شريط التنويه العلوي */
+.top-announcement {
+    background-color: var(--poirot-black);
+    color: var(--poirot-white);
+    font-size: 0.85rem;
+    border-bottom: 2px solid var(--poirot-blue);
+}
+
+/* شريط التنقل (Navbar) */
+.poirot-navbar {
+    background-color: var(--poirot-white);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 4px 15px rgba(11, 45, 86, 0.06);
+}
+
+.poirot-logo {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+}
+
+.brand-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--poirot-blue);
+    line-height: 1.1;
+    letter-spacing: 0.5px;
+}
+
+.brand-subtitle {
+    font-size: 0.75rem;
+    color: var(--poirot-black);
+    font-weight: 700;
+}
+
+.poirot-navbar .nav-link {
+    color: var(--poirot-black);
+    font-weight: 700;
+    font-size: 0.96rem;
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px;
+}
+
+    .poirot-navbar .nav-link:hover,
+    .poirot-navbar .nav-link.active {
+        color: var(--poirot-blue);
+        background-color: var(--poirot-blue-light);
+    }
+
+/* الأزرار الخاصة بهوية بوارو */
+.btn-poirot-blue {
+    background-color: var(--poirot-blue);
+    color: var(--poirot-white);
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 0.55rem 1.3rem;
+    border: 2px solid var(--poirot-blue);
+}
+
+    .btn-poirot-blue:hover {
+        background-color: var(--poirot-blue-hover);
+        border-color: var(--poirot-blue-hover);
+        color: var(--poirot-white);
+        transform: translateY(-2px);
+    }
+
+.btn-poirot-outline {
+    background-color: var(--poirot-white);
+    color: var(--poirot-blue);
+    border: 2px solid var(--poirot-blue);
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 0.5rem 1.15rem;
+}
+
+    .btn-poirot-outline:hover {
+        background-color: var(--poirot-blue);
+        color: var(--poirot-white);
+    }
+
+.btn-poirot-black {
+    background-color: var(--poirot-black);
+    color: var(--poirot-white);
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 0.55rem 1.3rem;
+    border: 2px solid var(--poirot-black);
+}
+
+    .btn-poirot-black:hover {
+        background-color: #000000;
+        color: var(--poirot-white);
+    }
+
+/* البطاقات والأختام البوليسية */
+.case-card {
+    background-color: var(--poirot-white);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(11, 45, 86, 0.04);
+}
+
+    .case-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--poirot-blue);
+        box-shadow: 0 12px 28px rgba(11, 45, 86, 0.12);
+    }
+
+.stamp-badge {
+    display: inline-block;
+    border: 2px solid var(--poirot-blue);
+    color: var(--poirot-blue);
+    background-color: var(--poirot-blue-light);
+    padding: 0.2rem 0.85rem;
+    font-weight: 800;
+    font-size: 0.82rem;
+    border-radius: 6px;
+}
+
+/* البانر الترحيبي (Hero Banner) */
+.poirot-hero {
+    background: linear-gradient(135deg, var(--poirot-blue) 0%, var(--poirot-black) 100%);
+    color: var(--poirot-white);
+    border-radius: 18px;
+}
+
+/* التذييل (Footer) */
+.poirot-footer {
+    background-color: var(--poirot-blue);
+    border-top: 4px solid var(--poirot-black);
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+    .footer-links a:hover {
+        color: var(--poirot-white);
+        padding-right: 6px;
+    }
+
+.footer-box {
+    background-color: rgba(17, 24, 39, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* =========================================
+   تنسيقات المرحلة 3 (الرئيسية + كيف تلعب؟)
+   ========================================= */
+
+.poirot-hero-full {
+    background: radial-gradient(circle at top left, #123f75 0%, var(--poirot-blue) 45%, var(--poirot-black) 100%);
+    color: var(--poirot-white);
+    border-bottom: 4px solid var(--poirot-black);
+}
+
+.hero-pill {
+    display: inline-block;
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    padding: 0.35rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.hero-highlight {
+    color: #dbeafe;
+    border-bottom: 3px solid #ffffff;
+    padding-bottom: 2px;
+}
+
+.dossier-preview-card {
+    background-color: var(--poirot-white);
+    border-radius: 16px;
+    border-top: 6px solid var(--poirot-black);
+}
+
+.confidential-stamp {
+    border: 2px solid var(--poirot-black);
+    color: var(--poirot-black);
+    font-weight: 800;
+    font-size: 0.78rem;
+    padding: 0.15rem 0.65rem;
+    border-radius: 4px;
+    transform: rotate(-4deg);
+    display: inline-block;
+}
+
+.case-cover-wrapper {
+    height: 220px;
+    padding: 0 !important;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border-color);
+    background: #e8eff7;
+}
+
+.case-cover-img {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.case-card:hover .case-cover-img {
+    transform: scale(1.06);
+}
+
+.edition-card {
+    background-color: var(--bg-page);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+    .edition-card:hover {
+        border-color: var(--poirot-blue);
+        box-shadow: 0 8px 22px rgba(11, 45, 86, 0.08);
+    }
+
+.feature-icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.poirot-page-header {
+    background: linear-gradient(135deg, var(--poirot-blue) 0%, var(--poirot-black) 100%);
+    border-bottom: 3px solid var(--poirot-black);
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--poirot-blue);
+    color: var(--poirot-white);
+    font-family: 'Changa', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 14px rgba(11, 45, 86, 0.22);
+}
+
+.accordion-poirot .accordion-button {
+    background-color: var(--poirot-white);
+    color: var(--poirot-black);
+    box-shadow: none;
+}
+
+    .accordion-poirot .accordion-button:not(.collapsed) {
+        background-color: var(--poirot-blue-light);
+        color: var(--poirot-blue);
+    }
+
+/* لتعديل تفعيل رابط كيف تلعب في الهيدر */
+.breadcrumb-item + .breadcrumb-item::before {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* =========================================
+   تنسيقات المرحلة 4 (الكتالوج + صفحة التفاصيل)
+   ========================================= */
+
+.filter-bar-card {
+    background-color: var(--poirot-white);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+}
+
+.case-detail-main-img-box {
+    background: linear-gradient(180deg, #f8fafc 0%, #e8eff7 100%);
+    border: 1px solid var(--border-color);
+    min-height: 300px;
+}
+
+.gallery-thumb {
+    width: 68px;
+    height: 68px;
+    padding: 4px;
+    background-color: var(--poirot-white);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .gallery-thumb img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .gallery-thumb:hover,
+    .gallery-thumb.active {
+        border-color: var(--poirot-blue);
+        box-shadow: 0 0 0 3px rgba(11, 45, 86, 0.14);
+    }
+
+.price-display-box {
+    background-color: var(--poirot-blue-light);
+    border: 1px solid rgba(11, 45, 86, 0.15);
+}
+
+.edition-toggle-btn {
+    background-color: var(--poirot-white);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+    .edition-toggle-btn:hover {
+        border-color: var(--poirot-blue);
+        background-color: #f8fbff;
+    }
+
+    .edition-toggle-btn.active {
+        border-color: var(--poirot-blue);
+        background-color: var(--poirot-blue-light);
+        box-shadow: 0 4px 14px rgba(11, 45, 86, 0.12);
+    }
+
+/* =========================================
+   أيقونات التواصل الاجتماعي وتحسين الجوال
+   ========================================= */
+
+.instagram-bg {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+.facebook-bg {
+    background-color: #1877f2;
+}
+
+.footer-social-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+    .footer-social-btn:hover {
+        color: #ffffff;
+        transform: translateY(-3px);
+    }
+
+    .footer-social-btn.social-wa:hover {
+        background-color: #25d366;
+        border-color: #25d366;
+    }
+
+    .footer-social-btn.social-fb:hover {
+        background-color: #1877f2;
+        border-color: #1877f2;
+    }
+
+    .footer-social-btn.social-ig:hover {
+        background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
+        border-color: transparent;
+    }
+
+/* تحسينات إضافية لشاشات الجوال الصغيرة */
+@media (max-width: 576px) {
+    .poirot-logo {
+        height: 46px;
+    }
+
+    .brand-title {
+        font-size: 1.05rem;
+    }
+
+    .top-announcement {
+        font-size: 0.76rem;
+    }
+
+    .display-5 {
+        font-size: 1.75rem;
+    }
+
+    .display-6 {
+        font-size: 1.5rem;
+    }
+}

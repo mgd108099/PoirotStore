@@ -1,0 +1,93 @@
+﻿@using System.Text.Json
+@inject CrimeGameStore.Web.Services.ISiteSettingsService SettingsService
+
+@{
+    var settings = await SettingsService.GetSettingsAsync();
+
+    ViewData["Title"] = "تواصل معنا";
+    ViewData["MetaDescription"] = $"تواصل مع فريق {settings.SiteName} عبر الهاتف، الواتساب، إنستغرام، أو فيسبوك للاستفسار عن القضايا والشحن وطلبات شام كاش.";
+
+    var phoneDisplay = settings.PhoneDisplay;
+    var waNumber = settings.WhatsAppNumber;
+    var instagramUrl = string.IsNullOrWhiteSpace(settings.InstagramUrl) ? "#" : settings.InstagramUrl;
+    var facebookUrl = string.IsNullOrWhiteSpace(settings.FacebookUrl) ? "#" : settings.FacebookUrl;
+}
+
+<section class="poirot-page-header py-5">
+    <div class="container text-center">
+        <h1 class="display-6 fw-bold text-white mb-2">تواصل مع فريق @settings.SiteName</h1>
+        <p class="lead text-light opacity-75 mx-auto mb-0" style="max-width: 620px;">
+            عندك استفسار عن قضية، الشحن، الدفع عبر شام كاش، أو حجز نسخ للكافيهات؟ نحن جاهزون للرد عليك مباشرة.
+        </p>
+    </div>
+</section>
+
+<section class="py-5 container">
+    <div class="row g-4 justify-content-center">
+
+        <!-- 1. الاتصال المباشر -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="case-card p-4 h-100 text-center d-flex flex-column justify-content-between">
+                <div>
+                    <div class="feature-icon-box bg-poirot-blue text-white mx-auto mb-3">
+                        <i class="fa-solid fa-phone-volume"></i>
+                    </div>
+                    <h2 class="h5 fw-bold text-poirot-blue mb-2">الاتصال المباشر</h2>
+                    <p class="text-muted small mb-3">للاستفسارات السريعة ومتابعة التوصيل</p>
+                </div>
+                <a href="tel:@phoneDisplay?.Replace(" ", "")" class="btn btn-poirot-outline w-100 fw-bold" dir="ltr">
+                    @phoneDisplay
+                </a>
+            </div>
+        </div>
+
+        <!-- 2. واتساب بوارو -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="case-card p-4 h-100 text-center d-flex flex-column justify-content-between">
+                <div>
+                    <div class="feature-icon-box bg-success text-white mx-auto mb-3">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <h2 class="h5 fw-bold text-dark mb-2">واتساب بوارو</h2>
+                    <p class="text-muted small mb-3">لتأكيد تحويلات شام كاش واستلام النسخ الرقمية</p>
+                </div>
+                <a href="https://wa.me/@waNumber" target="_blank" rel="noopener" class="btn btn-poirot-blue w-100">
+                    <i class="fa-brands fa-whatsapp ms-1"></i> راسلنا على واتساب
+                </a>
+            </div>
+        </div>
+
+        <!-- 3. صفحة إنستغرام -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="case-card p-4 h-100 text-center d-flex flex-column justify-content-between">
+                <div>
+                    <div class="feature-icon-box instagram-bg text-white mx-auto mb-3">
+                        <i class="fa-brands fa-instagram"></i>
+                    </div>
+                    <h2 class="h5 fw-bold text-dark mb-2">إنستغرام بوارو</h2>
+                    <p class="text-muted small mb-3">تابع أحدث القضايا والألغاز السريعة والعروض</p>
+                </div>
+                <a href="@instagramUrl" target="_blank" rel="noopener" class="btn btn-poirot-blue w-100">
+                    <i class="fa-brands fa-instagram ms-1"></i> تابعنا على إنستغرام
+                </a>
+            </div>
+        </div>
+
+        <!-- 4. صفحة فيسبوك -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="case-card p-4 h-100 text-center d-flex flex-column justify-content-between">
+                <div>
+                    <div class="feature-icon-box facebook-bg text-white mx-auto mb-3">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </div>
+                    <h2 class="h5 fw-bold text-dark mb-2">فيسبوك بوارو</h2>
+                    <p class="text-muted small mb-3">انضم لمجتمع المحققين وتواصل معنا عبر الماسنجر</p>
+                </div>
+                <a href="@facebookUrl" target="_blank" rel="noopener" class="btn btn-poirot-blue w-100">
+                    <i class="fa-brands fa-facebook-f ms-1"></i> زر صفحتنا على فيسبوك
+                </a>
+            </div>
+        </div>
+
+    </div>
+</section>

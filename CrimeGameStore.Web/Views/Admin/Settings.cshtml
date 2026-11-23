@@ -1,0 +1,120 @@
+﻿@model CrimeGameStore.Web.Models.SiteSetting
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "إعدادات ومحتوى الموقع (CMS)";
+}
+
+<h1 class="h4 fw-bold text-poirot mb-4">التحكم الكامل بنصوص وهوية وإعدادات الموقع</h1>
+
+<form asp-action="Settings" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="LogoUrl" />
+
+    <!-- 1. الهوية والشعار والتذييل -->
+    <div class="admin-card p-4 mb-4">
+        <h2 class="h6 fw-bold text-poirot border-bottom pb-2 mb-3">1. الهوية والشريط العلوي والتذييل</h2>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label asp-for="SiteName" class="form-label small fw-bold"></label>
+                <input asp-for="SiteName" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="SiteSubtitle" class="form-label small fw-bold"></label>
+                <input asp-for="SiteSubtitle" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold">تغيير صورة اللوغو (اختياري)</label>
+                <input type="file" name="logoFile" accept="image/*" class="form-control" />
+            </div>
+            <div class="col-12">
+                <label asp-for="TopAnnouncement" class="form-label small fw-bold"></label>
+                <input asp-for="TopAnnouncement" class="form-control" />
+            </div>
+            <div class="col-12">
+                <label asp-for="FooterAbout" class="form-label small fw-bold"></label>
+                <textarea asp-for="FooterAbout" class="form-control" rows="2"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. التواصل وحساب شام كاش -->
+    <div class="admin-card p-4 mb-4">
+        <h2 class="h6 fw-bold text-poirot border-bottom pb-2 mb-3">2. أرقام التواصل وحساب شام كاش (وباركود الدفع)</h2>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label asp-for="PhoneDisplay" class="form-label small fw-bold"></label>
+                <input asp-for="PhoneDisplay" class="form-control" dir="ltr" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="WhatsAppNumber" class="form-label small fw-bold"></label>
+                <input asp-for="WhatsAppNumber" class="form-control" dir="ltr" placeholder="963995775317" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="ShamCashAccount" class="form-label small fw-bold"></label>
+                <input asp-for="ShamCashAccount" class="form-control" dir="ltr" />
+            </div>
+            <div class="col-12">
+                <label asp-for="DepositNote" class="form-label small fw-bold"></label>
+                <input asp-for="DepositNote" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="InstagramUrl" class="form-label small fw-bold"></label>
+                <input asp-for="InstagramUrl" class="form-control" dir="ltr" placeholder="https://instagram.com/yourpage" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="FacebookUrl" class="form-label small fw-bold"></label>
+                <input asp-for="FacebookUrl" class="form-control" dir="ltr" placeholder="https://facebook.com/yourpage" />
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. نصوص الصفحة الرئيسية -->
+    <div class="admin-card p-4 mb-4">
+        <h2 class="h6 fw-bold text-poirot border-bottom pb-2 mb-3">3. نصوص الصفحة الرئيسية (البانر والدعوة للشراء)</h2>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label asp-for="HeroBadge" class="form-label small fw-bold"></label>
+                <input asp-for="HeroBadge" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="HeroTitle" class="form-label small fw-bold"></label>
+                <input asp-for="HeroTitle" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="HeroHighlight" class="form-label small fw-bold"></label>
+                <input asp-for="HeroHighlight" class="form-control" />
+            </div>
+            <div class="col-12">
+                <label asp-for="HeroDescription" class="form-label small fw-bold"></label>
+                <textarea asp-for="HeroDescription" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="col-md-5">
+                <label asp-for="HomeCtaTitle" class="form-label small fw-bold"></label>
+                <input asp-for="HomeCtaTitle" class="form-control" />
+            </div>
+            <div class="col-md-7">
+                <label asp-for="HomeCtaDescription" class="form-label small fw-bold"></label>
+                <input asp-for="HomeCtaDescription" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. إعدادات السيو العامة -->
+    <div class="admin-card p-4 mb-4">
+        <h2 class="h6 fw-bold text-poirot border-bottom pb-2 mb-3">4. إعدادات السيو الافتراضية (Google SEO)</h2>
+        <div class="row g-3">
+            <div class="col-12">
+                <label asp-for="DefaultMetaDescription" class="form-label small fw-bold"></label>
+                <textarea asp-for="DefaultMetaDescription" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="col-12">
+                <label asp-for="DefaultMetaKeywords" class="form-label small fw-bold"></label>
+                <input asp-for="DefaultMetaKeywords" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-poirot btn-lg px-5">
+        <i class="fa-solid fa-check-double ms-1"></i> حفظ كل التغييرات في الموقع
+    </button>
+</form>

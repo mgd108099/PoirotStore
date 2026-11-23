@@ -1,0 +1,87 @@
+﻿@using CrimeGameStore.Web.Models
+@model IEnumerable<Order>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "لوحة التحكم";
+}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <h1 class="h4 fw-bold text-poirot mb-0">ملخص متجر بوارو</h1>
+    <div class="d-flex gap-2">
+        <a asp-action="CreateCase" class="btn btn-poirot btn-sm"><i class="fa-solid fa-plus ms-1"></i> إضافة قضية جديدة</a>
+        <a href="/sitemap.xml" target="_blank" class="btn btn-outline-dark btn-sm"><i class="fa-solid fa-sitemap ms-1"></i> معاينة Sitemap</a>
+    </div>
+</div>
+
+<!-- بطاقات الإحصائيات -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="admin-card p-3">
+            <div class="small text-muted">إجمالي القضايا (الفعالة)</div>
+            <div class="h3 fw-bold text-poirot mb-0">@ViewBag.TotalCases <small class="fs-6 text-success">(@ViewBag.ActiveCases فعالة)</small></div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="admin-card p-3">
+            <div class="small text-muted">طلبات جديدة بانتظار التأكيد</div>
+            <div class="h3 fw-bold text-danger mb-0">@ViewBag.PendingOrders</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="admin-card p-3">
+            <div class="small text-muted">إجمالي الطلبات</div>
+            <div class="h3 fw-bold text-dark mb-0">@ViewBag.TotalOrders</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="admin-card p-3">
+            <div class="small text-muted">إجمالي المبيعات (غير الملغاة)</div>
+            <div class="h3 fw-bold text-success mb-0">@(((decimal)ViewBag.TotalRevenue).ToString("0.##")) $</div>
+        </div>
+    </div>
+</div>
+
+<!-- أحدث الطلبات -->
+<div class="admin-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h6 fw-bold text-poirot mb-0">أحدث الطلبات الواردة</h2>
+        <a asp-action="Orders" class="small fw-bold text-poirot">عرض كل الطلبات &larr;</a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <p class="text-muted small mb-0 text-center py-3">لا توجد طلبات مسجلة حتى الآن.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle small mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>رقم الطلب</th>
+                        <th>المشتري</th>
+                        <th>الهاتف</th>
+                        <th>المبلغ</th>
+                        <th>الحالة</th>
+                        <th>التاريخ</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold" dir="ltr">@o.OrderNumber</td>
+                            <td>@o.CustomerName</td>
+                            <td dir="ltr">@o.PhoneNumber</td>
+                            <td class="fw-bold text-poirot">@o.TotalAmount.ToString("0.##") $</td>
+                            <td>@o.Status</td>
+                            <td dir="ltr">@o.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                            <td><a asp-action="OrderDetails" asp-route-id="@o.Id" class="btn btn-sm btn-poirot">إدارة</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

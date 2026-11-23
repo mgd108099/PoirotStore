@@ -1,0 +1,164 @@
+﻿@model CrimeGameStore.Web.Models.CrimeCase
+@{
+    Layout = "_AdminLayout";
+    bool isEdit = Model.Id > 0;
+    ViewData["Title"] = isEdit ? $"تعديل قضية: {Model.Title}" : "إضافة قضية جديدة";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h4 fw-bold text-poirot mb-0">@ViewData["Title"]</h1>
+    <a asp-action="Cases" class="btn btn-outline-secondary btn-sm">العودة لقائمة القضايا</a>
+</div>
+
+<div class="admin-card p-4 mb-4">
+    <form asp-action="@(isEdit ? "EditCase" : "CreateCase")" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="All" class="text-danger small mb-3"></div>
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="CoverImageUrl" />
+
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label asp-for="CaseCode" class="form-label small fw-bold"></label>
+                <input asp-for="CaseCode" class="form-control" placeholder="مثال: #513/C" />
+            </div>
+            <div class="col-md-5">
+                <label asp-for="Title" class="form-label small fw-bold"></label>
+                <input asp-for="Title" class="form-control" placeholder="عنوان القضية" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Slug" class="form-label small fw-bold">الرابط الصديق للسيو (اتركه فارغاً لتوليده تلقائياً)</label>
+                <input asp-for="Slug" class="form-control" placeholder="مثال: قضية-السم-النائم" />
+            </div>
+
+            <div class="col-12">
+                <label asp-for="ShortDescription" class="form-label small fw-bold"></label>
+                <textarea asp-for="ShortDescription" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="col-12">
+                <label asp-for="FullStory" class="form-label small fw-bold"></label>
+                <textarea asp-for="FullStory" class="form-control" rows="4"></textarea>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="Difficulty" class="form-label small fw-bold"></label>
+                <select asp-for="Difficulty" class="form-select">
+                    <option value="سهل">سهل</option>
+                    <option value="متوسط">متوسط</option>
+                    <option value="صعب">صعب</option>
+                    <option value="للمحترفين">للمحترفين</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="PlayersCount" class="form-label small fw-bold"></label>
+                <input asp-for="PlayersCount" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="EstimatedTime" class="form-label small fw-bold"></label>
+                <input asp-for="EstimatedTime" class="form-control" />
+            </div>
+
+            <!-- الأسعار والمخزون (الورقي بالليرة السورية والرقمي بالدولار) -->
+            <div class="col-md-3">
+                <label asp-for="PhysicalPrice" class="form-label small fw-bold">سعر الورقي (ل.س)</label>
+                <input asp-for="PhysicalPrice" type="number" step="1" class="form-control" placeholder="مثال: 150000" />
+            </div>
+            <div class="col-md-3">
+                <label asp-for="PhysicalStock" class="form-label small fw-bold">مخزون الورقي</label>
+                <input asp-for="PhysicalStock" type="number" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label asp-for="DigitalPrice" class="form-label small fw-bold">سعر الرقمي ($)</label>
+                <input asp-for="DigitalPrice" type="number" step="0.01" class="form-control" placeholder="مثال: 8" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">رفع صورة غلاف جديدة</label>
+                <input type="file" name="coverImage" accept="image/*" class="form-control" />
+            </div>
+
+            <!-- خيارات التفعيل -->
+            <div class="col-12 d-flex flex-wrap gap-4 py-2 bg-light rounded px-3">
+                <div class="form-check">
+                    <input asp-for="IsPhysicalAvailable" class="form-check-input" />
+                    <label asp-for="IsPhysicalAvailable" class="form-check-label small fw-bold">تفعيل النسخة الورقية</label>
+                </div>
+                <div class="form-check">
+                    <input asp-for="IsDigitalAvailable" class="form-check-input" />
+                    <label asp-for="IsDigitalAvailable" class="form-check-label small fw-bold">تفعيل النسخة الإلكترونية</label>
+                </div>
+                <div class="form-check">
+                    <input asp-for="IsFeatured" class="form-check-input" />
+                    <label asp-for="IsFeatured" class="form-check-label small fw-bold">إظهار في الصفحة الرئيسية</label>
+                </div>
+                <div class="form-check">
+                    <input asp-for="IsActive" class="form-check-input" />
+                    <label asp-for="IsActive" class="form-check-label small fw-bold">القضية نشطة وظاهرة</label>
+                </div>
+            </div>
+
+            <!-- إعدادات SEO للقضية -->
+            <div class="col-12 border-top pt-3 mt-2">
+                <h2 class="h6 fw-bold text-poirot mb-2">إعدادات محركات البحث (SEO) الخاصة بهذه القضية</h2>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="MetaTitle" class="form-label small fw-bold">عنوان جوجل (Meta Title)</label>
+                <input asp-for="MetaTitle" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="MetaKeywords" class="form-label small fw-bold">كلمات مفتاحية (Meta Keywords)</label>
+                <input asp-for="MetaKeywords" class="form-control" />
+            </div>
+            <div class="col-12">
+                <label asp-for="MetaDescription" class="form-label small fw-bold">وصف جوجل (Meta Description)</label>
+                <textarea asp-for="MetaDescription" class="form-control" rows="2"></textarea>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-poirot px-5">
+                <i class="fa-solid fa-floppy-disk ms-1"></i> @(isEdit ? "حفظ التعديلات" : "إضافة القضية")
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- قسم معرض صور القضية (يظهر بعد حفظ القضية) -->
+@if (isEdit)
+{
+    <div class="admin-card p-4">
+        <h2 class="h5 fw-bold text-poirot mb-3">معرض صور ومحتويات القضية (Gallery)</h2>
+
+        <form asp-action="AddGalleryImage" method="post" enctype="multipart/form-data" class="row g-2 align-items-end mb-4 pb-3 border-bottom">
+            <input type="hidden" name="crimeCaseId" value="@Model.Id" />
+            <div class="col-md-4">
+                <label class="form-label small fw-bold">اختر صورة</label>
+                <input type="file" name="galleryFile" accept="image/*" class="form-control" required />
+            </div>
+            <div class="col-md-5">
+                <label class="form-label small fw-bold">وصف الصورة (Alt للسيو)</label>
+                <input type="text" name="caption" class="form-control" placeholder="مثال: الظرف المختوم وتقارير الطب الشرعي" />
+            </div>
+            <div class="col-md-1">
+                <label class="form-label small fw-bold">الترتيب</label>
+                <input type="number" name="sortOrder" value="1" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-poirot w-100">رفع للمعرض</button>
+            </div>
+        </form>
+
+        <div class="row g-3">
+            @foreach (var img in Model.GalleryImages)
+            {
+                <div class="col-6 col-md-3">
+                    <div class="border rounded p-2 text-center bg-light">
+                        <img src="@img.ImageUrl" class="img-fluid rounded mb-2" style="height: 120px; object-fit: contain;" />
+                        <div class="small text-muted mb-2">@img.Caption</div>
+                        <form asp-action="DeleteGalleryImage" asp-route-id="@img.Id" method="post">
+                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">حذف الصورة</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
